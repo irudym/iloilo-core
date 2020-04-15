@@ -37,7 +37,27 @@ class ActiveQuiz < ApplicationRecord
     self.quiz.description
   end
 
+  def question_ids
+    @question = quiz.questions.order('RAND()').limit(1).first
+    [@question.id]
+  end
+
+  def questions
+    [@question]
+  end
+
   def connected_users
     Connection.connected_users(self)
+  end
+
+  def submitted_users
+    users = QuizResponse.where(active_quiz: self).distinct.pluck(:user_id)
+    response = User.where(id: users).map do |user|
+      {
+        name: "#{user.first_name} #{user.last_name}",
+        score: QuizResponse.user_score(user: user, active_quiz: self)
+      }
+    end
+    response
   end
 end

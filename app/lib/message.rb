@@ -38,4 +38,12 @@ class Message
   def self.wrong_quiz_id
     'You are trying to change a question for unexisting qiuz'
   end
+
+  def self.quiz_inactive
+    'Sorry the quiz is finished, try the next time'
+  end
+
+  def self.already_answered
+    'You have already answered to this question, only one attempt is allowed'
+  end
 end

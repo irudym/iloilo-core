@@ -47,7 +47,6 @@ class V1::ActiveQuizzesController < ApplicationController
   end
 
   def set_active_quiz
-    puts "\n===>LOG[ActiveQuizzesController]: set_active_quiz"
     # check if active quiz belongs to current user
     if !@current_user.active_quizzes.exists?(params[:id]) 
       raise(ActiveRecord::RecordNotFound, Message.wrong_quiz_id) 

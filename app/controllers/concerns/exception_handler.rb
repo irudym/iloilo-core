@@ -7,6 +7,7 @@ module ExceptionHandler
   class MissingToken < StandardError; end
   class InvalidToken < StandardError; end
   class CannotUpdate < StandardError; end
+  class QuizInactive < StandardError; end
 
   included do
     # define custom handlers
@@ -15,6 +16,13 @@ module ExceptionHandler
     rescue_from ExceptionHandler::MissingToken, with: :four_twenty_two
     rescue_from ExceptionHandler::InvalidToken, with: :four_twenty_two
     rescue_from ExceptionHandler::CannotUpdate, with: :four_twenty_two
+    
+    
+    rescue_from ExceptionHandler::QuizInactive do |e|
+      errors = [{ status: 404, title: 'Quiz is inactive', detail: e.message}]
+      json_response( {errors: errors }, :not_found)
+    end
+
     # rescue_from NoMethodError, with: :four_twenty_two
 
     rescue_from ActiveRecord::RecordNotFound do |e|

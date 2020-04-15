@@ -30,12 +30,64 @@ RSpec.describe 'Evaluations API', type: :request do
         end
       end
 
-      describe ' GET/evaluations/:PIN/quiz' do
+      describe 'GET /evaluations/:PIN/quiz' do
         before { get "/#{controller}/#{started_quiz_pin}/quiz", params: {}, headers: headers }
 
-        it 'returns array of questions with answers' do
-          puts "==>LOG[EvaluationsSpec]: response: #{json}"
-          expect(json['data']['attributes']['questions']).not_to be_empty
+        it 'returns active quiz object with relationships - one quesiton by random' do
+          expect(json['data']['relationships']).not_to be_empty
+          expect(json['data']['relationships']['questions']['data'].length).to eq(1)
+        end
+      end
+
+      describe 'PUT /evaluations/:PIN/quiz' do 
+        let(:valid_attributes) {
+          {
+            data: {
+              type: 'evaluation',
+              attributes: {
+                pin: started_active_quiz.pin
+              },
+              relationships: {
+                questions: {
+                  data: [
+                    {
+                      type: 'question',
+                      id: started_active_quiz.quiz.questions.first.id,
+                      relationships: {
+                        answers: {
+                          data: [
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.first.id,
+                              attributes: {
+                                correct: true
+                              }
+                            },
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.second.id,
+                              attributes: {
+                                correct: true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }.to_json
+        }
+        before { post "/#{controller}/#{started_quiz_pin}/quiz", params: valid_attributes, headers: headers }
+
+        it 'accepts the evaluation woth status 201' do
+          expect(response).to have_http_status(200)
+        end
+
+        it 'returns next question' do 
+          # puts "LOG[Evaluation_Spec]: response: #{json}"
         end
       end
     end

@@ -5,7 +5,13 @@ class ActiveQuizSerializer
   attributes :connected_users, if: Proc.new { |record, params| 
     params && params[:admin] == true
   }
-  belongs_to :quiz, if: Proc.new { |record, params|
-    !(params && params[:hide_quiz] == true)
+  attributes :submitted_users, if: Proc.new { |record, params|
+    params && params[:admin] == true
+  }
+  #belongs_to :quiz, if: Proc.new { |record, params|
+  #  !(params && params[:hide_quiz] == true)
+  #}
+  has_many :questions, if: Proc.new { |record, params | 
+    params && params[:show_questions]
   }
 end

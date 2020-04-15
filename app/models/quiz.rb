@@ -54,4 +54,39 @@ class Quiz < ApplicationRecord
       end
     end
   end
+
+  # provided_quesitons  - an array with questions objects 
+  def evaluate(provided_questions)
+    user_right_answers = provided_questions.inject({}) do |acc, question|
+      if question[:relationships] && question[:relationships][:answers] && question[:relationships][:answers][:data]
+        acc[question[:id].to_i] = question[:relationships][:answers][:data].inject([]) do |accumul, answer|
+          accumul << answer[:id].to_i if answer[:attributes][:correct]
+          accumul
+        end
+      end
+      acc
+    end
+
+    questions_rigth_answers = Answer.where(question: self.questions, correct: true).inject({}) do |acc, answer|
+      (acc[answer.question.id] ||= []).push(answer.id)
+      acc
+    end
+
+    # puts "\n===> LOG[QuizModel] questions_right_answers= #{questions_rigth_answers}"
+    # puts "\n===> LOG[QuizModel] user_right_answers= #{user_right_answers.to_json}"
+    count = 0
+    score = questions_rigth_answers.inject(0) do |acc, question|
+      count +=1
+      # question is an array with answers id
+      if user_right_answers[question[0]]
+        if user_right_answers[question[0]].length == question[1].length
+          if question[1] & user_right_answers[question[0]] == question[1]
+            acc += 1
+          end
+        end
+      end
+      acc
+    end
+    ((score.to_f / count.to_f) * 100).to_i if count!=0
+  end
 end
