@@ -30,7 +30,7 @@ RSpec.describe 'Evaluations API', type: :request do
         end
       end
 
-      describe 'GET /evaluations/:PIN/quiz' do
+      describe 'POST /evaluations/:PIN/quiz' do
         before { get "/#{controller}/#{started_quiz_pin}/quiz", params: {}, headers: headers }
 
         it 'returns active quiz object with relationships - one quesiton by random' do
@@ -39,7 +39,7 @@ RSpec.describe 'Evaluations API', type: :request do
         end
       end
 
-      describe 'PUT /evaluations/:PIN/quiz' do 
+      describe 'POST /evaluations/:PIN/quiz' do 
         let(:valid_attributes) {
           {
             data: {
@@ -88,6 +88,150 @@ RSpec.describe 'Evaluations API', type: :request do
 
         it 'returns next question' do 
           # puts "LOG[Evaluation_Spec]: response: #{json}"
+        end
+      end
+
+      describe 'when an user POST response with no provided answers (with correct field)' do 
+        let(:invalid_attributes) {
+          {
+            data: {
+              type: 'evaluation',
+              attributes: {
+                pin: started_active_quiz.pin
+              },
+              relationships: {
+                questions: {
+                  data: [
+                    {
+                      type: 'question',
+                      id: started_active_quiz.quiz.questions.first.id,
+                      relationships: {
+                        answers: {
+                          data: [
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.first.id,
+                            },
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.second.id,
+                              attributes: {
+                                correct: false
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }.to_json
+        }
+        before { post "/#{controller}/#{started_quiz_pin}/quiz", params: invalid_attributes, headers: headers }
+
+        it 'response with error' do
+          expect(json['errors'][0]['detail']).to match(/At least one answer should be selected/)
+        end
+      end
+
+      describe 'when submit the answers on the same questions twise' do
+        let(:valid_attributes) {
+          {
+            data: {
+              type: 'evaluation',
+              attributes: {
+                pin: started_active_quiz.pin
+              },
+              relationships: {
+                questions: {
+                  data: [
+                    {
+                      type: 'question',
+                      id: started_active_quiz.quiz.questions.first.id,
+                      relationships: {
+                        answers: {
+                          data: [
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.first.id,
+                              attributes: {
+                                correct: true,
+                              }
+                            },
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.second.id,
+                              attributes: {
+                                correct: false
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }.to_json
+        }
+        before {
+          post "/#{controller}/#{started_quiz_pin}/quiz", params: valid_attributes, headers: headers
+          post "/#{controller}/#{started_quiz_pin}/quiz", params: valid_attributes, headers: headers
+        }
+        it "doesn't count provided answers and still provide a next question" do
+          expect(json['data']['type']).to eq('question')
+        end
+      end
+
+      describe 'when submit the answer after time ends' do
+        let(:valid_attributes) {
+          {
+            data: {
+              type: 'evaluation',
+              attributes: {
+                pin: started_active_quiz.pin
+              },
+              relationships: {
+                questions: {
+                  data: [
+                    {
+                      type: 'question',
+                      id: started_active_quiz.quiz.questions.first.id,
+                      relationships: {
+                        answers: {
+                          data: [
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.first.id,
+                              attributes: {
+                                correct: true
+                              }
+                            },
+                            {
+                              type: 'answer',
+                              id: started_active_quiz.quiz.questions.first.answers.second.id,
+                              attributes: {
+                                correct: true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }.to_json
+        }
+        let(:ended_active_quiz) { create(:started_quiz, ended_at: DateTime.current - 200.minutes) }
+        before { post "/#{controller}/#{ended_active_quiz.pin}/quiz", params: valid_attributes, headers: headers }
+
+        it 'returns immidiate result' do
+          expect(json['data']['type']).to eq('evaluation')
         end
       end
     end

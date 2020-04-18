@@ -6,23 +6,19 @@ class ActiveQuiz < ApplicationRecord
   has_many :quiz_responses
 
   def self.create! params
-    # check if the quiz activated - DEPRECATED an user may activate at quiz as many as needed!
-    # activeQuiz = ActiveQuiz.where(quiz_id: params[:quiz_id])
-    # unless activeQuiz.empty?
-    #  activeQuiz.each do |a_quiz|
-    #    if a_quiz.started 
-    #      raise(ExceptionHandler::CannotUpdate, Message.quiz_started) 
-    #    end
-    #  end
-    # end
     # TODO: check that pin is uniq
     params[:pin] = pin
     super params
   end
 
   def start!
-    ended_at = Time.now + duration
+    ended_at = Time.now + duration.minutes
     self.update!(started: true, ended_at: ended_at) 
+  end
+
+  def is_valid
+    return true unless self.ended_at
+    DateTime.current <= self.ended_at
   end
 
   def duration
@@ -55,9 +51,18 @@ class ActiveQuiz < ApplicationRecord
     response = User.where(id: users).map do |user|
       {
         name: "#{user.first_name} #{user.last_name}",
-        score: QuizResponse.user_score(user: user, active_quiz: self)
+        score: user_score(user)
       }
     end
     response
+  end
+
+  def user_score (user)
+    user_score = QuizResponse.user_score(user: user, active_quiz: self)
+    question_count = self.quiz.questions.count
+    max_score = self.quiz.max_score
+    max_score = 100 if max_score == 0
+    # puts "\nLOG[ActiveQuizModel]: user_score=#{user_score}  count=#{question_count}   max_score=#{max_score}"
+    ((user_score.to_f / question_count.to_f) * max_score.to_f).to_i
   end
 end

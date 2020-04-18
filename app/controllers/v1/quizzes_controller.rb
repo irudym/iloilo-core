@@ -47,6 +47,6 @@ class V1::QuizzesController < ApplicationController
 
   def quiz_params
     # whitelist params
-    params.require(:data).require(:attributes).permit(:title, :description, :duration)
+    params.require(:data).require(:attributes).permit(:title, :description, :duration, :max_score)
   end
 end

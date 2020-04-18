@@ -18,7 +18,7 @@ class V1::EvaluationsController < ApplicationController
     response = {}
 
     if questions.empty?
-      final_score = QuizResponse.user_score(user: @current_user, active_quiz: @quiz)
+      final_score = @quiz.user_score(@current_user)
       response = {
         data: {
           type: "evaluation",
@@ -39,19 +39,12 @@ class V1::EvaluationsController < ApplicationController
     Connection.create!(user: @current_user, active_quiz: @quiz)
 
     response = {}
-    # if questions.empty?
-    #  final_score = QuizResponse.user_score(user: @current_user, active_quiz: @quiz)
-    #  response = {
-    #    data: {
-    #      type: "evaluation",
-    #      attributes: {
-    #        score: final_score
-    #      } 
-    #    }
-    #  }.to_json
-    #else
       #check if quiz started
       options = {}
+      unless @quiz.is_valid
+        @quiz.update!(started: false)
+        raise(ExceptionHandler::QuizInactive, Message.quiz_inactive)
+      end
       options[:include] = [:'questions', :'questions.answers'] if @quiz.started
       options[:params] = { :admin => false, :show_questions => true }
       response = ActiveQuizSerializer.new(@quiz, options)
@@ -66,41 +59,58 @@ class V1::EvaluationsController < ApplicationController
       raise(ExceptionHandler::QuizInactive, Message.quiz_inactive)
     end
 
-    # check if an aswers already submitted for the question
-    #question_id = params[:data][:relationships][:questions][:data][0][:id]
-
-    params[:data][:relationships][:questions][:data].each do |provided_question|
-      question = Question.find(provided_question[:id])
-      if QuizResponse.where(user: @current_user, active_quiz: @quiz, question: question).empty?
-        score = question.evaluate(provided_question[:relationships][:answers][:data])
-
-        # create a response record
-        answers = Answer.where(id: score[:answers])
-        QuizResponse.create!(user: @current_user, active_quiz: @quiz, question: question, score: score[:score], answers: answers)
-      end
-    end
-    
-    submitted_questions = QuizResponse.where(user: @current_user, active_quiz: @quiz).map do |resp|
-      resp.question.id
-    end
-
     response = {}
-    # find next question
-    next_question = @quiz.quiz.questions.where.not(id: submitted_questions).order('RAND()').limit(1)
-    unless next_question.empty? 
-      options = {}
-      options[:include] = [:answers]
-      response = QuestionSerializer.new(next_question.first, options)
-    else
-      final_score = QuizResponse.user_score(user: @current_user, active_quiz: @quiz)
-      response = {
-        data: {
-          type: "evaluation",
-          attributes: {
-            score: final_score
-          } 
+    # check if the quiz is still running
+    if @quiz.is_valid
+      params[:data][:relationships][:questions][:data].each do |provided_question|
+        # check if an aswers already submitted for the question
+        question = Question.find(provided_question[:id])
+        if QuizResponse.where(user: @current_user, active_quiz: @quiz, question: question).empty?
+
+          score = question.evaluate(provided_question[:relationships][:answers][:data])
+          if score[:score] == -1
+            raise(ExceptionHandler::AnswerMissed, Message.no_answers)  
+          end
+          
+          # create a response record
+          answers = Answer.where(id: score[:answers])
+          QuizResponse.create!(user: @current_user, active_quiz: @quiz, question: question, score: score[:score], answers: answers)
+        end
+      end
+      
+      submitted_questions = QuizResponse.where(user: @current_user, active_quiz: @quiz).map do |resp|
+        resp.question.id
+      end
+
+      
+      # find next question
+      next_question = @quiz.quiz.questions.where.not(id: submitted_questions).order('RAND()').limit(1)
+      unless next_question.empty? 
+        options = {}
+        options[:include] = [:answers]
+        response = QuestionSerializer.new(next_question.first, options)
+      else
+        final_score = @quiz.user_score(@current_user)
+        response = {
+          data: {
+            type: "evaluation",
+            attributes: {
+              score: final_score
+            } 
+          }
         }
-      }
+      end
+    else
+      # in case the time is out - just show immidiate result
+      final_score = @quiz.user_score(@current_user)
+        response = {
+          data: {
+            type: "evaluation",
+            attributes: {
+              score: final_score
+            } 
+          }
+        }        
     end
     render json: response.to_json 
   end

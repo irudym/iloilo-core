@@ -46,4 +46,8 @@ class Message
   def self.already_answered
     'You have already answered to this question, only one attempt is allowed'
   end
+
+  def self.no_answers
+    'At least one answer should be selected'
+  end
 end

@@ -22,13 +22,15 @@ class Question < ApplicationRecord
 
   def evaluate(provided_answers)
     user_right_answers = provided_answers.inject([]) do |acc, answer|
-      acc << answer[:id].to_i if answer[:attributes][:correct]
+      acc << answer[:id].to_i if (answer[:attributes] && answer[:attributes][:correct])
       acc
+    end
+
+    if user_right_answers.empty? 
+      return { score: -1, answers: [] }
     end
       
     right_answers = self.answers.where(correct: true).map { |answer| answer.id }
-
-    puts "LOG[QuestionModel]: \n==> user_right_answers=#{user_right_answers}\n==> right_answers=#{right_answers}"
 
     if user_right_answers.length == right_answers.length
       if right_answers & user_right_answers == right_answers

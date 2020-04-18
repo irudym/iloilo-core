@@ -1,13 +1,10 @@
 class V1::ActiveQuizzesController < ApplicationController
   before_action :set_active_quiz, only: [:show, :update, :destroy, :restore]
-
+  before_action :set_options, only: [:index, :create, :update, :show]
 
   def index
-    activeQuizzes = @current_user.active_quizzes
-
-    options = {}
-    options[:params] = { :admin => @current_user.is_admin? }
-    render json: ActiveQuizSerializer.new(activeQuizzes, options)
+    activeQuizzes = @current_user.active_quizzes.order(created_at: :desc)
+    render json: ActiveQuizSerializer.new(activeQuizzes, @options)
   end
 
   def create
@@ -17,22 +14,16 @@ class V1::ActiveQuizzesController < ApplicationController
     end
 
     @activeQuiz = ActiveQuiz.create!(active_quiz_params.merge(user: @current_user))
-    options = {}
-    options[:params] = { :admin => @current_user.is_admin? }
-    render json: ActiveQuizSerializer.new(@activeQuiz, options), status: 201
+    render json: ActiveQuizSerializer.new(@activeQuiz, @options), status: 201
   end
 
   def update
     @activeQuiz.start!
-    options = {}
-    options[:params] = { :admin => @current_user.is_admin? }
-    render json: ActiveQuizSerializer.new(@activeQuiz, options), status: 201
+    render json: ActiveQuizSerializer.new(@activeQuiz, @options), status: 201
   end
 
   def show
-    options = {}
-    options[:params] = { :admin => @current_user.is_admin? }
-    render json: ActiveQuizSerializer.new(@activeQuiz, options)
+    render json: ActiveQuizSerializer.new(@activeQuiz, @options)
   end
 
   def destroy
@@ -41,6 +32,11 @@ class V1::ActiveQuizzesController < ApplicationController
   end
 
   private 
+
+  def set_options
+    @options = {}
+    @options[:params] = { :admin => @current_user.is_admin? }
+  end
   
   def active_quiz_params
     params.require(:data).require(:relationships).permit(:quiz_id)

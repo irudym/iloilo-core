@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_15_183611) do
+ActiveRecord::Schema.define(version: 2020_04_16_111557) do
 
   create_table "active_quizzes", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin", force: :cascade do |t|
     t.string "pin"
@@ -99,6 +99,7 @@ ActiveRecord::Schema.define(version: 2020_04_15_183611) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "duration", default: 10
     t.bigint "user_id"
+    t.integer "max_score", default: 100
     t.index ["user_id"], name: "index_quizzes_on_user_id"
   end
 

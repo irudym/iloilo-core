@@ -5,7 +5,7 @@ class V1::AuthenticationController < ApplicationController
     # sleep 5
     auth_token = AuthenticateUser.new(auth_params[:email], auth_params[:password]).call
     user = User.find_by(email:auth_params[:email])
-    json_response({ auth_token: auth_token, email: user.email, first_name: user.first_name, id: user.id })
+    json_response({ auth_token: auth_token, email: user.email, user_name: user.first_name, id: user.id })
   end
 
   private

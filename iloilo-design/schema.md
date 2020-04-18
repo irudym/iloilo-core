@@ -8,6 +8,7 @@
 * [has_many] *questions*  - reference to question cards
 * [belongs_to] *user*  - reference to admin user
 * *duration* (default: 10 minutes)- **in minutes** when quiz may be available for students
+* *max_score* (default: 100) - represents maximum score for the test, students' score calculated by following formula: score = (student_correct_answers/quiz_answers)*max_score
 
 
 #### Question
