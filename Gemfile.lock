@@ -68,6 +68,16 @@ GEM
       i18n
       rake (>= 10.0.0)
       sshkit (>= 1.9.0)
+    capistrano-bundler (1.6.0)
+      capistrano (~> 3.1)
+    capistrano-passenger (0.2.0)
+      capistrano (~> 3.0)
+    capistrano-rails (1.4.0)
+      capistrano (~> 3.1)
+      capistrano-bundler (~> 1.1)
+    capistrano-rvm (0.1.2)
+      capistrano (~> 3.0)
+      sshkit (~> 1.2)
     concurrent-ruby (1.1.6)
     crass (1.0.6)
     database_cleaner (1.8.3)
@@ -204,6 +214,10 @@ DEPENDENCIES
   bootsnap (>= 1.4.2)
   byebug
   capistrano (~> 3.13)
+  capistrano-bundler
+  capistrano-passenger (>= 0.1.1)
+  capistrano-rails
+  capistrano-rvm
   database_cleaner
   factory_bot_rails
   faker
