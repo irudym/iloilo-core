@@ -2,7 +2,7 @@ class V1::QuizzesController < ApplicationController
   before_action :set_quiz, only: [:show, :update, :destroy, :restore]
 
   def index
-    quizzes = @current_user.quizzes
+    quizzes = @current_user.quizzes.order(created_at: :desc)
     render json: QuizSerializer.new(quizzes)
   end
 
