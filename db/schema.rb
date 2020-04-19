@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_16_111557) do
+ActiveRecord::Schema.define(version: 2020_04_19_180655) do
 
   create_table "active_quizzes", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin", force: :cascade do |t|
     t.string "pin"
@@ -110,7 +110,9 @@ ActiveRecord::Schema.define(version: 2020_04_16_111557) do
     t.string "password_digest"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "group_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["group_id"], name: "index_users_on_group_id"
   end
 
   add_foreign_key "active_quizzes", "quizzes"
@@ -126,4 +128,5 @@ ActiveRecord::Schema.define(version: 2020_04_16_111557) do
   add_foreign_key "quiz_responses", "questions"
   add_foreign_key "quiz_responses", "users"
   add_foreign_key "quizzes", "users"
+  add_foreign_key "users", "groups"
 end
