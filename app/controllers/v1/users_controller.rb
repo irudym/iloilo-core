@@ -22,7 +22,7 @@ class V1::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:data).require(:attributes).permit(:first_name, :last_name, :email, :password)
+    params.require(:data).require(:attributes).permit(:first_name, :last_name, :email, :password, :group_id)
   end
 
   def set_user
