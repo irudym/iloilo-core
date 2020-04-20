@@ -2,7 +2,8 @@ class V1::UsersController < ApplicationController
   skip_before_action :authenticate_admin, only: :create
 
   def create
-    params[:email].downcase!
+    puts "LOG[USER_C] params=> #{params.to_json}"
+    params[:data][:attributes][:email].downcase!
     user = User.create!(user_params)
 
     auth_token = AuthenticateUser.new(user.email, user.password).call
