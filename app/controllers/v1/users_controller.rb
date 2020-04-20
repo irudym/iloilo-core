@@ -2,6 +2,7 @@ class V1::UsersController < ApplicationController
   skip_before_action :authenticate_admin, only: :create
 
   def create
+    params[:email].downcase!
     user = User.create!(user_params)
 
     auth_token = AuthenticateUser.new(user.email, user.password).call
