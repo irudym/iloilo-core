@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resources :answers, defaults: {format: :json}
     resources :active_quizzes,  defaults: {format: :json}
     resources :groups, defaults: {format: :json}
+    resources :reports, defaults: {format: :json}
 
     get 'evaluations/:pin/quiz' => 'evaluations#quiz'
     post 'evaluations/:pin/quiz' => 'evaluations#assess'

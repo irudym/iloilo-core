@@ -50,6 +50,7 @@ class ActiveQuiz < ApplicationRecord
     users = QuizResponse.where(active_quiz: self).distinct.pluck(:user_id)
     response = User.where(id: users).map do |user|
       {
+        id: user.id,
         name: "#{user.first_name} #{user.last_name}",
         score: user_score(user)
       }
@@ -64,5 +65,35 @@ class ActiveQuiz < ApplicationRecord
     max_score = 100 if max_score == 0
     # puts "\nLOG[ActiveQuizModel]: user_score=#{user_score}  count=#{question_count}   max_score=#{max_score}"
     ((user_score.to_f / question_count.to_f) * max_score.to_f).to_i
+  end
+
+  def report_by_user
+    by_users = self.submitted_users.inject([]) do |acc, user|
+      responses = QuizResponse.where(user_id: user[:id], active_quiz: self)
+      questions = responses.inject([]) do |accul, response|
+        accul << {
+          id: response.question.id,
+          text: response.question.text,
+          correct_count: response.question.correct_answers_count,
+          answer_count: response.question.answers.count,
+          answers: response.answers.inject([]) do |accumul, answer|
+            accumul << {
+              id: answer.id,
+              text: answer.text,
+              correct: answer.correct
+            }
+            accumul
+          end
+        }
+        accul
+      end
+      acc << {
+        user_id: user[:id],
+        user: user[:name],
+        score: user[:score],
+        questions: questions
+      }
+      acc
+    end
   end
 end

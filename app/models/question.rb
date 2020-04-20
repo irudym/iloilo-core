@@ -20,6 +20,10 @@ class Question < ApplicationRecord
     self.destroy
   end
 
+  def correct_answers_count
+    self.answers.where(correct: true).count
+  end
+
   def evaluate(provided_answers)
     user_right_answers = provided_answers.inject([]) do |acc, answer|
       acc << answer[:id].to_i if (answer[:attributes] && answer[:attributes][:correct])
