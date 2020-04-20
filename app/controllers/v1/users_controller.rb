@@ -1,8 +1,9 @@
 class V1::UsersController < ApplicationController
-  skip_before_action :authenticate_admin, only: :create
+  skip_before_action :authenticate_admin, only: [:create, :update, :show]
+  before_action :authenticate_user, only: [:update, :show]
 
   def create
-    puts "LOG[USER_C] params=> #{params.to_json}"
+    # puts "LOG[USER_C] params=> #{params.to_json}"
     params[:data][:attributes][:email].downcase!
     user = User.create!(user_params)
 
@@ -17,8 +18,31 @@ class V1::UsersController < ApplicationController
     json_response(response, :created)
   end
 
-  def show
+  def update
+    @current_user.update!(
+      first_name: params[:data][:attributes][:first_name],
+      last_name: params[:data][:attributes][:last_name]
+    )
+
+    if params[:data][:attributes][:password]
+      @current_user.update!(password: params[:data][:attributes][:password])
+      puts "\nLOG[UserController]=> User's password  updated: #{@current_user.to_json}"
+    end
+
+    puts "\nLOG[UserController]=> User updated: #{@current_user.to_json}"
     
+    response = {
+      message: Message.account_updated,
+      email: @current_user.email,
+      id: @current_user.id,
+      user_name: @current_user.first_name
+    }
+    json_response(response, :created)
+  end
+
+  def show
+    # puts "\nLOG[UserController]=> #{@current_user.to_json}"
+    render json: UserSerializer.new(@current_user)
   end
 
   private
