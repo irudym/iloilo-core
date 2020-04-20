@@ -23,10 +23,12 @@ class V1::UsersController < ApplicationController
       first_name: params[:data][:attributes][:first_name],
       last_name: params[:data][:attributes][:last_name]
     )
+    auth_token = nil
 
     if params[:data][:attributes][:password]
       @current_user.update!(password: params[:data][:attributes][:password])
-      puts "\nLOG[UserController]=> User's password  updated: #{@current_user.to_json}"
+      puts "\nLOG[UserController]=> User's password  updated: #{@current_user.to_json}\n"
+      auth_token = AuthenticateUser.new(@current_user.email, @current_user.password).call
     end
 
     puts "\nLOG[UserController]=> User updated: #{@current_user.to_json}"
@@ -35,7 +37,8 @@ class V1::UsersController < ApplicationController
       message: Message.account_updated,
       email: @current_user.email,
       id: @current_user.id,
-      user_name: @current_user.first_name
+      user_name: @current_user.first_name,
+      auth_token: auth_token
     }
     json_response(response, :created)
   end
