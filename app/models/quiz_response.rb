@@ -24,7 +24,7 @@ class QuizResponse < ApplicationRecord
 
   def self.user_score(user:, active_quiz: )
     QuizResponse.where(user: user, active_quiz: active_quiz).inject(0) do |acc, resp|
-      acc += resp.score
+      acc += resp.score if resp.score
       acc
     end
   end

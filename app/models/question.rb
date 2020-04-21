@@ -1,5 +1,5 @@
 class Question < ApplicationRecord
-  belongs_to :quiz
+  belongs_to :quiz, optional: true
   has_many :answers
   # DEPRECATED has_many :correct_answers
   
@@ -13,11 +13,20 @@ class Question < ApplicationRecord
   end
 
   def destroy_with_answers
-    # destory all answers
-    self.answers.each do |answer|
-      answer.destroy
+
+    # check if the quesiton already has been answered 
+    unless QuizResponse.where(question: self).empty?
+      # and in that case keep it in sake of history (and access in reports)
+      # and remove it from quiz
+      # self.quiz = nil
+      self.update!(quiz_id: nil)
+    else
+      # destory all answers
+      self.answers.each do |answer|
+        answer.destroy!
+      end
+      self.destroy!
     end
-    self.destroy
   end
 
   def correct_answers_count

@@ -74,6 +74,7 @@ class ActiveQuiz < ApplicationRecord
         accul << {
           id: response.question.id,
           text: response.question.text,
+          deleted: !response.question.quiz_id,
           correct_count: response.question.correct_answers_count,
           answer_count: response.question.answers.count,
           answers: response.answers.inject([]) do |accumul, answer|
