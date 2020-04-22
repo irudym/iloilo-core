@@ -31,8 +31,8 @@ class Quiz < ApplicationRecord
           if question[:id]
             begin 
               qst = Question.find(question[:id].to_i)
-              qst.update!(text: question[:attributes][:text]) if qst
-              qst.update_answers(question[:relationships])
+              qst.update!(text: question[:attributes][:text]) if qst # obsolete code as find will raise an exception in case no question
+              qst.update_answers(question[:relationships]) if qst
               acc << question[:id].to_i
             rescue
               qst = nil

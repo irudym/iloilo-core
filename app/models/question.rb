@@ -13,7 +13,6 @@ class Question < ApplicationRecord
   end
 
   def destroy_with_answers
-
     # check if the quesiton already has been answered 
     unless QuizResponse.where(question: self).empty?
       # and in that case keep it in sake of history (and access in reports)
