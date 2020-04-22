@@ -12,7 +12,7 @@ class ActiveQuiz < ApplicationRecord
   end
 
   def start!
-    ended_at = Time.now + duration.minutes
+    ended_at = DateTime.current + duration.minutes
     self.update!(started: true, ended_at: ended_at) 
   end
 
