@@ -6,8 +6,10 @@ class ActiveQuiz < ApplicationRecord
   has_many :quiz_responses
 
   def self.create! params
-    # TODO: check that pin is uniq
-    params[:pin] = pin
+    begin
+      generated_pin = pin
+    end while ActiveQuiz.exists?(pin: generated_pin)
+    params[:pin] = generated_pin
     super params
   end
 
