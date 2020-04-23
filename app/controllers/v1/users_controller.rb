@@ -3,8 +3,6 @@ class V1::UsersController < ApplicationController
   before_action :authenticate_user, only: [:update, :show]
 
   def create
-    # puts "LOG[USER_C] params=> #{params.to_json}"
-    params[:data][:attributes][:email].downcase!
     user = User.create!(user_params)
 
     auth_token = AuthenticateUser.new(user.email, user.password).call
@@ -23,15 +21,12 @@ class V1::UsersController < ApplicationController
       first_name: params[:data][:attributes][:first_name],
       last_name: params[:data][:attributes][:last_name]
     )
-    auth_token = nil
 
+    auth_token = nil
     if params[:data][:attributes][:password]
       @current_user.update!(password: params[:data][:attributes][:password])
-      puts "\nLOG[UserController]=> User's password  updated: #{@current_user.to_json}\n"
       auth_token = AuthenticateUser.new(@current_user.email, @current_user.password).call
     end
-
-    puts "\nLOG[UserController]=> User updated: #{@current_user.to_json}"
     
     response = {
       message: Message.account_updated,

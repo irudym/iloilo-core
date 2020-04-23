@@ -12,12 +12,13 @@ class User < ApplicationRecord
   has_secure_password
   
   before_create :downcase_email
+  before_update :downcase_email
 
   def is_admin?
     admin != nil 
   end
 
   def downcase_email
-    self.email.downcase!
+    self.email.downcase! if self.email
   end
 end
