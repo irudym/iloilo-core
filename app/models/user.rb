@@ -21,4 +21,18 @@ class User < ApplicationRecord
   def downcase_email
     self.email.downcase! if self.email
   end
+
+  def generate_password_token!
+    begin
+      self.reset_password_token = SecureRandom.urlsafe_base64
+    end while User.exists?(reset_password_token: self.reset_password_token)
+    self.reset_password_token_expires_at = 1.day.from_now
+    save!
+  end
+
+  def clear_password_token!
+    self.reset_password_token = nil
+    self.reset_password_token_expires_at = nil
+    save!
+  end
 end

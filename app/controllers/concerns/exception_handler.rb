@@ -9,6 +9,7 @@ module ExceptionHandler
   class CannotUpdate < StandardError; end
   class QuizInactive < StandardError; end
   class AnswerMissed < StandardError; end
+  class ResetPasswordError < StandardError; end
 
   included do
     # define custom handlers
@@ -25,6 +26,11 @@ module ExceptionHandler
     end
 
     # rescue_from NoMethodError, with: :four_twenty_two
+
+    rescue_from ExceptionHandler::ResetPasswordError do |e|
+      errors = [{ status: 401, title: "Unauthorized request", detail: "Please request password reset again"}]
+      json_response( { errors: errors }, :unauthorized)
+    end
 
     rescue_from ActiveRecord::RecordNotFound do |e|
       errors = [{ status: 404, title: 'Record Not Found', detail: e.message }]
