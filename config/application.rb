@@ -34,6 +34,10 @@ module Core
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    Mailgun.configure do |config|
+      config.api_key = ENV['MAILGUN_API_KEY']
+    end
+
     # Enable cross-origins request
     config.middleware.insert_before 0, Rack::Cors do
       allow do
