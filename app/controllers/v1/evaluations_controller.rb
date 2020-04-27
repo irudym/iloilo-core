@@ -42,6 +42,7 @@ class V1::EvaluationsController < ApplicationController
       #check if quiz started
       options = {}
       unless @quiz.is_valid
+        # TODO may skip it as all quizes tracked by ended_at field
         @quiz.update!(started: false)
         raise(ExceptionHandler::QuizInactive, Message.quiz_inactive)
       end
@@ -69,6 +70,8 @@ class V1::EvaluationsController < ApplicationController
 
           score = question.evaluate(provided_question[:relationships][:answers][:data])
           if score[:score] == -1
+            logger.debug "[CoreError]: at EvaluationsController#assess provided quesiton without answers: 
+              #{provided_question[:relationships][:answers][:data].to_json}" 
             raise(ExceptionHandler::AnswerMissed, Message.no_answers)  
           end
           
