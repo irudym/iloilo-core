@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_23_142346) do
+ActiveRecord::Schema.define(version: 2020_04_28_074702) do
 
   create_table "active_quizzes", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin", force: :cascade do |t|
     t.string "pin"
@@ -118,6 +118,14 @@ ActiveRecord::Schema.define(version: 2020_04_23_142346) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token"
   end
 
+  create_table "vuexloggers", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin", force: :cascade do |t|
+    t.text "log"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id"], name: "index_vuexloggers_on_user_id"
+  end
+
   add_foreign_key "active_quizzes", "quizzes"
   add_foreign_key "active_quizzes", "users"
   add_foreign_key "admins", "users"
@@ -132,4 +140,5 @@ ActiveRecord::Schema.define(version: 2020_04_23_142346) do
   add_foreign_key "quiz_responses", "users"
   add_foreign_key "quizzes", "users"
   add_foreign_key "users", "groups"
+  add_foreign_key "vuexloggers", "users"
 end

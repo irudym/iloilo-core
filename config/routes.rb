@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
   
-  get 'password_reset/create'
   scope module: :v1 do
     resources :quizzes, defaults: { format: :json}
     resources :questions, defaults: {format: :json}
@@ -8,6 +7,7 @@ Rails.application.routes.draw do
     resources :active_quizzes,  defaults: {format: :json}
     resources :groups, defaults: {format: :json}
     resources :reports, defaults: {format: :json}
+    resources :vuexloggers, defaults: {format: :json}
     resources :password_resets, only: [:create] do
       collection do
         get ':token', action: :edit, as: :edit

@@ -60,6 +60,9 @@ class V1::EvaluationsController < ApplicationController
       raise(ExceptionHandler::QuizInactive, Message.quiz_inactive)
     end
 
+    # debug
+    # sleep 10
+
     response = {}
     # check if the quiz is still running
     if @quiz.is_valid
