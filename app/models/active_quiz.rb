@@ -82,7 +82,9 @@ class ActiveQuiz < ApplicationRecord
     by_users = self.submitted_users.inject([]) do |acc, user|
       responses = QuizResponse.where(user_id: user[:id], active_quiz: self)
       questions = responses.inject([]) do |accul, response|
-        question_count += 1 if response.question.quiz_id
+        if response.question.quiz_id
+          question_count += 1
+        end
         accul << {
           id: response.question.id,
           text: response.question.text,
@@ -103,7 +105,7 @@ class ActiveQuiz < ApplicationRecord
       acc << {
         user_id: user[:id],
         user: user[:name],
-        score: ((question_count.to_f / total_questions.to_f) * max_score.to_f).to_i,
+        score: user[:score],
         questions: questions
       }
       acc
