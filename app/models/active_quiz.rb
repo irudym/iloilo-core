@@ -35,6 +35,10 @@ class ActiveQuiz < ApplicationRecord
     self.quiz.description
   end
 
+  def max_score
+    self.quiz.max_score
+  end
+
   def question_ids
     # next_question = quiz.questions.where(not answered).order('RAND()').limit(1).first
     # questions = QuizResponse for this user and for this ActiveQuiz (self)

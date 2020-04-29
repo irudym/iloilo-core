@@ -8,7 +8,9 @@ class V1::ReportsController < ApplicationController
     response = {
       data: {
         type: "report",
-        attributes: by_user
+        attributes: {
+          users: by_user
+        }
       }
     }
     render json: response.to_json
