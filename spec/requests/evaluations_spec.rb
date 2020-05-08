@@ -30,7 +30,7 @@ RSpec.describe 'Evaluations API', type: :request do
         end
       end
 
-      describe 'POST /evaluations/:PIN/quiz' do
+      describe 'GET /evaluations/:PIN/quiz' do
         before { get "/#{controller}/#{started_quiz_pin}/quiz", params: {}, headers: headers }
 
         it 'returns active quiz object with relationships - one quesiton by random' do
@@ -82,12 +82,14 @@ RSpec.describe 'Evaluations API', type: :request do
         }
         before { post "/#{controller}/#{started_quiz_pin}/quiz", params: valid_attributes, headers: headers }
 
-        it 'accepts the evaluation woth status 201' do
+        it 'accepts the evaluation with status 201' do
           expect(response).to have_http_status(200)
         end
 
-        it 'returns next question' do 
+        it 'returns the next question with answers included' do 
           # puts "LOG[Evaluation_Spec]: response: #{json}"
+          expect(json['data']['attributes']['text']).not_to be_empty
+          expect(json['included']).not_to be_empty
         end
       end
 

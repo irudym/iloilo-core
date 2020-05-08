@@ -42,13 +42,13 @@ class V1::EvaluationsController < ApplicationController
       #check if quiz started
       options = {}
       unless @quiz.is_valid
-        # TODO may skip it as all quizes tracked by ended_at field
+        # TODO: may skip it as all quizes tracked by ended_at field
         @quiz.update!(started: false)
         raise(ExceptionHandler::QuizInactive, Message.quiz_inactive)
       end
       options[:include] = [:'questions', :'questions.answers'] if @quiz.started
       options[:params] = { :admin => false, :show_questions => true }
-      response = ActiveQuizSerializer.new(@quiz, options)
+      response = ActiveQuizSerializer.new(@quiz, options).serialized_json
     #end
 
     render json: response
@@ -59,6 +59,8 @@ class V1::EvaluationsController < ApplicationController
     unless @quiz.started
       raise(ExceptionHandler::QuizInactive, Message.quiz_inactive)
     end
+
+    logger.debug "User[#{@current_user.id}]: evaluates answer" 
 
     # debug
     # sleep 10
@@ -73,7 +75,7 @@ class V1::EvaluationsController < ApplicationController
 
           score = question.evaluate(provided_question[:relationships][:answers][:data])
           if score[:score] == -1
-            logger.debug "[CoreError]: at EvaluationsController#assess provided quesiton without answers: 
+            logger.debug "[CoreError]: at EvaluationsController#assess provided question without answers: 
               #{provided_question[:relationships][:answers][:data].to_json}" 
             raise(ExceptionHandler::AnswerMissed, Message.no_answers)  
           end
@@ -94,7 +96,9 @@ class V1::EvaluationsController < ApplicationController
       unless next_question.empty? 
         options = {}
         options[:include] = [:answers]
-        response = QuestionSerializer.new(next_question.first, options)
+        options[:params] = { :admin =>  false }
+        response = QuestionSerializer.new(next_question.first, options).serialized_json
+        logger.debug "User[#{@current_user.id}]: evaluates answer and get next question: #{response}" 
       else
         final_score = @quiz.user_score(@current_user)
         response = {
@@ -104,7 +108,7 @@ class V1::EvaluationsController < ApplicationController
               score: final_score
             } 
           }
-        }
+        }.to_json
       end
     else
       # in case the time is out - just show immidiate result
@@ -116,9 +120,9 @@ class V1::EvaluationsController < ApplicationController
               score: final_score
             } 
           }
-        }        
+        }.to_json        
     end
-    render json: response.to_json 
+    render json: response 
   end
 
   private

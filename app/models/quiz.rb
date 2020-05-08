@@ -72,8 +72,6 @@ class Quiz < ApplicationRecord
       acc
     end
 
-    # puts "\n===> LOG[QuizModel] questions_right_answers= #{questions_rigth_answers}"
-    # puts "\n===> LOG[QuizModel] user_right_answers= #{user_right_answers.to_json}"
     count = 0
     score = questions_rigth_answers.inject(0) do |acc, question|
       count +=1
