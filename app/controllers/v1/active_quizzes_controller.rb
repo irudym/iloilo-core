@@ -18,7 +18,7 @@ class V1::ActiveQuizzesController < ApplicationController
   end
 
   def update
-    @activeQuiz.start!
+    @activeQuiz.start! params
     render json: ActiveQuizSerializer.new(@activeQuiz, @options), status: 201
   end
 
@@ -39,7 +39,9 @@ class V1::ActiveQuizzesController < ApplicationController
   end
   
   def active_quiz_params
-    params.require(:data).require(:relationships).permit(:quiz_id)
+    relationships = params.require(:data).require(:relationships).permit(:quiz_id)
+    attributes = params.require(:data).permit(:attributes).permit(:duration).permit(:comment)
+    relationships.merge(attributes)
   end
 
   def set_active_quiz

@@ -34,13 +34,35 @@ RSpec.describe 'Active Quizzes API', type: :request do
     end
 
     describe 'PUT /active_quizzes/:id' do
-      let(:active_quiz) { admin_user.active_quizzes.first } 
-      before { put "/#{controller}/#{active_quiz.id}", headers: headers }
+      context 'when no params provided' do
+        let(:active_quiz) { admin_user.active_quizzes.first } 
+        before { put "/#{controller}/#{active_quiz.id}", params: {data: {}}.to_json, headers: headers }
 
-      it 'starts the quiz' do 
-        expect(json['data']['attributes']['started']).to be_truthy
-      end 
+        it 'starts the quiz' do 
+          expect(json['data']['attributes']['started']).to be_truthy
+        end 
+      end
+
+      context 'when duration is overrided' do
+        let(:active_quiz) { admin_user.active_quizzes.first } 
+        before { put "/#{controller}/#{active_quiz.id}", params: { data: { attributes: { duration: 123 }}}.to_json, headers: headers }
+
+        it 'starts the quiz' do 
+          expect(json['data']['attributes']['duration']).to be_eql(123)
+        end 
+      end
+
+      context 'when comment provided' do
+        let(:active_quiz) { admin_user.active_quizzes.first }
+        before { put "/#{controller}/#{active_quiz.id}", params: {data: { attributes: { comment: 'Just a comment'}}}.to_json, headers: headers } 
+
+        it 'starts the quiz and update the comment' do
+          expect(json['data']['attributes']['comment']).to be_eql('Just a comment')
+        end
+      end
+      
     end
+
 
     describe "tries to activate quiz which does't belong to the admin user" do
       # create quiz for the admin user

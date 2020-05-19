@@ -1,7 +1,7 @@
 class ActiveQuizSerializer
   # TODO add params https://github.com/Netflix/fast_jsonapi#params
   include FastJsonapi::ObjectSerializer
-  attributes :pin, :ended_at, :started, :duration, :title, :is_valid, :description, :max_score
+  attributes :pin, :ended_at, :started, :duration, :title, :is_valid, :description, :max_score, :comment
   attributes :connected_users, if: Proc.new { |record, params| 
     params && params[:admin] == true
   }

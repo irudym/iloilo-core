@@ -10,12 +10,18 @@ class ActiveQuiz < ApplicationRecord
       generated_pin = pin
     end while ActiveQuiz.exists?(pin: generated_pin)
     params[:pin] = generated_pin
+    quiz = Quiz.find(params[:quiz_id])
+    params[:duration] = quiz.duration unless params[:duration]
     super params
   end
 
-  def start!
+  def start! params
+    # override duration in case provided
+    duration = self.duration
+    duration = params[:data][:attributes][:duration].to_i if params[:data][:attributes] and params[:data][:attributes][:duration]
+    comment = params[:data][:attributes][:comment] if params[:data][:attributes]
     ended_at = DateTime.current + duration.minutes
-    self.update!(started: true, ended_at: ended_at) 
+    self.update!(started: true, ended_at: ended_at, duration: duration, comment: comment) 
   end
 
   def is_valid
@@ -23,9 +29,9 @@ class ActiveQuiz < ApplicationRecord
     DateTime.current <= self.ended_at
   end
 
-  def duration
-    self.quiz.duration
-  end
+  # def duration
+  #  self.quiz.duration
+  # end
 
   def title
     self.quiz.title

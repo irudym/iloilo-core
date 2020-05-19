@@ -40,7 +40,7 @@ class Message
   end
 
   def self.wrong_quiz_id
-    'You are trying to change a question for unexisting qiuz'
+    'You are trying to change an unexisting quiz'
   end
 
   def self.quiz_inactive
